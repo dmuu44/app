@@ -1,0 +1,53 @@
+const jwt = require('jsonwebtoken');
+const db = require('../config/database');
+
+const authenticateToken = async (req, res, next) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+
+  if (!token) {
+    return res.status(401).json({ error: 'Access token required' });
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const userResult = await db.query(
+      'SELECT id, email, username, display_name, avatar_url, bio, website, is_creator FROM profiles WHERE id = $1',
+      [decoded.userId]
+    );
+
+    if (userResult.rows.length === 0) {
+      return res.status(401).json({ error: 'User not found' });
+    }
+
+    req.user = userResult.rows[0];
+    next();
+  } catch (error) {
+    return res.status(403).json({ error: 'Invalid or expired token' });
+  }
+};
+
+const optionalAuth = async (req, res, next) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+
+  if (token) {
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      const userResult = await db.query(
+        'SELECT id, email, username, display_name, avatar_url, bio, website, is_creator FROM profiles WHERE id = $1',
+        [decoded.userId]
+      );
+
+      if (userResult.rows.length > 0) {
+        req.user = userResult.rows[0];
+      }
+    } catch (error) {
+      // Token is invalid, but we continue without user
+    }
+  }
+
+  next();
+};
+
+module.exports = { authenticateToken, optionalAuth };
