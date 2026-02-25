@@ -47,6 +47,11 @@ jobs:
       - run:
           name: Deploy
           command: |
+            if [ -z "$EC2_IP" ]; then
+              echo "Error: EC2_IP environment variable is not set"
+              echo "Please add EC2_IP to CircleCI project environment variables"
+              exit 1
+            fi
             ssh -o StrictHostKeyChecking=no ec2-user@$EC2_IP "
               if [ ! -d /home/ec2-user/blog-app ]; then
                 git clone https://github.com/MaheshKumarBisai/Blog-app.git /home/ec2-user/blog-app
