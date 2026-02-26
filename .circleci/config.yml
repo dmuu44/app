@@ -53,6 +53,11 @@ jobs:
               exit 0
             fi
             ssh -o StrictHostKeyChecking=no ec2-user@$EC2_IP "
+              if ! command -v git &> /dev/null; then
+                echo 'Git is not installed on the EC2 instance'
+                echo 'Please install git: sudo yum install git -y (Amazon Linux) or sudo apt-get install git -y (Ubuntu)'
+                exit 1
+              fi &&
               if [ ! -d /home/ec2-user/blog-app ]; then
                 git clone https://github.com/MaheshKumarBisai/Blog-app.git /home/ec2-user/blog-app
               fi &&
