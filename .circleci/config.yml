@@ -53,7 +53,7 @@ jobs:
               fi &&
               cd /home/ec2-user/blog-app && git pull origin main &&
               npm install --prefix frontend &&
-              pip install -r backend/requirements.txt &&
+              npm install --prefix backend &&
               sudo systemctl restart blog-app
             "
 
