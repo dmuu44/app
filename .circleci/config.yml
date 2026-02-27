@@ -38,24 +38,36 @@ jobs:
             fi
 
   deploy_to_ec2:
-    docker:
-      - image: cimg/base:stable
-    steps:
-      - add_ssh_keys:
-          fingerprints:
-            - "SHA256:9ajH+lqwmRGo1IWNb2wwtf2IDAByxh1TxNjmmINm6DM"
-      - run:
-          name: Deploy
-          command: |
-            ssh -o StrictHostKeyChecking=no ec2-user@$EC2_IP "
-              if [ ! -d /home/ec2-user/blog-app ]; then
-                git clone https://github.com/MaheshKumarBisai/Blog-app.git /home/ec2-user/blog-app
-              fi &&
-              cd /home/ec2-user/blog-app && git pull origin main &&
-              npm install --prefix frontend &&
-              pip install -r backend/requirements.txt &&
-              sudo systemctl restart blog-app
-            "
+  docker:
+    - image: cimg/base:stable
+  steps:
+    - add_ssh_keys:
+        fingerprints:
+          - "SHA256:9ajH+lqwmRGo1IWNb2wwtf2IDAByxh1TxNjmmINm6DM"
+    - run:
+        name: Deploy
+        command: |
+          ssh -o StrictHostKeyChecking=no ec2-user@$EC2_IP "
+            if [ ! -d /home/ec2-user/blog-app ]; then
+              git clone https://github.com/MaheshKumarBisai/Blog-app.git /home/ec2-user/blog-app
+            fi
+
+            cd /home/ec2-user/blog-app
+            git fetch origin
+            git reset --hard origin/main
+
+            cd frontend
+            rm -rf node_modules
+            npm install
+            cd ..
+
+            cd backend
+            rm -rf node_modules
+            npm install
+            cd ..
+
+            sudo systemctl restart blog-app
+          "
 
 workflows:
   ci_cd_pipeline:
