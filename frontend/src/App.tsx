@@ -5,6 +5,7 @@ import { Header } from './components/Layout/Header';
 import { Home } from './pages/Home';
 import { Login } from './pages/Login';
 import { Register } from './pages/Register';
+import { ContentDetail } from './pages/ContentDetail';
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, loading } = useAuth();
@@ -55,6 +56,14 @@ const AppRoutes: React.FC = () => {
           <>
             <Header />
             <Home />
+          </>
+        } />
+
+        {/* Content detail route */}
+        <Route path="/content/:id" element={
+          <>
+            <Header />
+            <ContentDetail />
           </>
         } />
 
